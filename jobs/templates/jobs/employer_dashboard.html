@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Employer Dashboard</h2>
+        <a href="{% url 'jobs:post_job' %}" class="btn btn-success">
+            + Post New Job
+        </a>
+
+    </div>
+
+    <!-- AI Recommendations -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-body">
+            <h4 class="mb-3">🤖 AI Recommended Freelancers</h4>
+
+            {% if recommended_freelancers %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+    <tr>
+        <th>Freelancer</th>
+        <th>Skills</th>
+        <th>Job Match</th>
+        <th>Match %</th>
+        <th>Action</th>
+    </tr>
+</thead>
+<tbody>
+    {% for item in recommended_freelancers %}
+    <tr>
+        <td class="fw-semibold">
+            {{ item.freelancer.username }}
+        </td>
+
+        <td class="text-muted">
+            {{ item.skills }}
+        </td>
+
+        <td>
+            {{ item.job.title }}
+        </td>
+
+        <td>
+            <span class="badge bg-success">
+                {{ item.score }}%
+            </span>
+        </td>
+
+        <td>
+            <form method="POST"
+      action="{% url 'jobs:invite_freelancer' item.job.id item.freelancer.id %}">
+    {% csrf_token %}
+    <button type="submit"
+            class="btn btn-sm btn-outline-primary">
+        Approach
+    </button>
+</form>
+
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">No AI recommendations yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Your Jobs -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4 class="mb-3">📄 Your Jobs</h4>
+
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                  <thead class="table-light">
+    <tr>
+        <th>Title</th>
+        <th>Budget</th>
+        <th>Deadline</th>
+        <th>Proposals</th>
+        <th>Chat</th>
+    </tr>
+</thead>
+<tbody>
+    {% for job in jobs %}
+    <tr>
+        <td class="fw-semibold">{{ job.title }}</td>
+        <td>₹{{ job.budget }}</td>
+        <td>{{ job.deadline }}</td>
+        <td>
+            <a href="{% url 'employer:view_proposals' job.id %}"
+               class="btn btn-primary btn-sm">
+                View Proposals
+            </a>
+        </td>
+        <td>
+            {% if job.freelancer %}
+                <a href="{% url 'jobs:job_chat' job.id %}"
+                   class="btn btn-info btn-sm">
+                    Open Chat
+                </a>
+            {% else %}
+                <span class="text-muted">Not Assigned</span>
+            {% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5" class="text-center text-muted">
+            No jobs posted yet
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

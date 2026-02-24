@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center"
+     style="min-height:100vh;">
+
+    <div class="card shadow-sm p-4" style="max-width: 600px; width:100%;">
+
+        <h3 class="mb-3 text-center">{{ job.title }}</h3>
+
+        <div class="mb-3">
+            <p class="mb-1"><strong>Description</strong></p>
+            <p class="text-muted">{{ job.description }}</p>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <p class="mb-1"><strong>Budget</strong></p>
+                <p class="text-muted">₹{{ job.budget }}</p>
+            </div>
+
+            <div class="col-md-6">
+                <p class="mb-1"><strong>Deadline</strong></p>
+                <p class="text-muted">{{ job.deadline }}</p>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <p class="mb-1"><strong>Skills Required</strong></p>
+            <p class="text-muted">{{ job.skills_required }}</p>
+        </div>
+
+        <form method="post" class="d-flex justify-content-between">
+            {% csrf_token %}
+
+            <button type="submit" class="btn btn-success px-4">
+                Confirm Apply
+            </button>
+
+            <a href="{% url 'freelancer:freelancer_dashboard' %}"
+               class="btn btn-outline-secondary px-4">
+                Cancel
+            </a>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

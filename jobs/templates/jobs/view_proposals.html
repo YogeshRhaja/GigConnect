@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h4 class="fw-bold mb-4 text-center">Freelancer Proposals</h4>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Freelancer</th>
+                            <th>Bid Amount</th>
+                            <th>Cover Letter</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for proposal in proposals %}
+                        <tr>
+                            <td class="fw-semibold">
+                                {{ proposal.freelancer.username }}
+                            </td>
+
+                            <td>₹{{ proposal.bid_amount }}</td>
+
+                            <td class="text-start">
+                                {{ proposal.cover_letter }}
+                            </td>
+
+                            <td>
+                                {% if proposal.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">
+                                        Pending
+                                    </span>
+                                {% elif proposal.status == 'accepted' %}
+                                    <span class="badge bg-success">
+                                        Accepted
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger">
+                                        Rejected
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if proposal.status == 'pending' %}
+                                    <a href="{% url 'jobs:accept_proposal' proposal.id %}"
+                                       class="btn btn-success btn-sm">
+                                        Accept
+                                    </a>
+                                    <a href="{% url 'jobs:reject_proposal' proposal.id %}"
+                                       class="btn btn-danger btn-sm">
+                                        Reject
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-muted">
+                                No proposals received yet.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

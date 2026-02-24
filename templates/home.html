@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    body {
+        background-color: #f8fafc;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .hero {
+        background: linear-gradient(120deg, #0f172a, #1e293b);
+        color: white;
+        padding: 90px 20px;
+        text-align: center;
+        border-radius: 12px;
+    }
+
+    .hero h1 {
+        font-size: 3rem;
+        font-weight: 700;
+    }
+
+    .hero p {
+        font-size: 1.2rem;
+        margin-top: 10px;
+        color: #cbd5e1;
+    }
+
+    .btn-main {
+        background-color: #22c55e;
+        color: white;
+        padding: 12px 28px;
+        border-radius: 30px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .btn-outline {
+        border: 2px solid white;
+        color: white;
+        padding: 12px 28px;
+        border-radius: 30px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .feature-card {
+        background: white;
+        border-radius: 14px;
+        padding: 30px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        transition: transform 0.3s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-6px);
+    }
+
+    footer {
+        background-color: #0f172a;
+        color: #94a3b8;
+        padding: 20px;
+        text-align: center;
+        margin-top: 60px;
+        border-radius: 12px;
+    }
+</style>
+
+<!-- HERO -->
+<section class="hero mb-5">
+    <h1>Hire Experts. Work Confidently.</h1>
+    <p>AI-powered freelancing platform with secure escrow payments</p>
+
+    <div class="mt-4">
+        <a href="{% url 'accounts:login' %}" class="btn-main me-3">Login</a>
+        <a href="{% url 'accounts:signup' %}" class="btn-outline">Create Account</a>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="container my-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Why Choose Us?</h2>
+        <p class="text-muted">Built for trust, speed, and smart hiring</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="feature-card text-center">
+                <h5 class="fw-bold">AI Job Matching</h5>
+                <p class="text-muted mt-2">
+                    Freelancers and employers are matched using AI skill analysis.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="feature-card text-center">
+                <h5 class="fw-bold">Secure Escrow Payments</h5>
+                <p class="text-muted mt-2">
+                    Funds are released only after work approval.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="feature-card text-center">
+                <h5 class="fw-bold">Verified Proposals</h5>
+                <p class="text-muted mt-2">
+                    Transparent bidding and proposal management.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="container my-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">How It Works</h2>
+    </div>
+
+    <div class="row g-4 text-center">
+        <div class="col-md-3">
+            <div class="feature-card">
+                <h6 class="fw-bold">1. Create Account</h6>
+                <p class="text-muted">Signup as Employer or Freelancer</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card">
+                <h6 class="fw-bold">2. Post or Apply</h6>
+                <p class="text-muted">Jobs or proposals in minutes</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card">
+                <h6 class="fw-bold">3. Secure Escrow</h6>
+                <p class="text-muted">Payments held safely</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card">
+                <h6 class="fw-bold">4. Get Paid</h6>
+                <p class="text-muted">Release after approval</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    © 2026 FreelanceHub | Secure AI Freelancing Platform
+</footer>
+
+{% endblock %}
