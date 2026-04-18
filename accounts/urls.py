@@ -1,10 +1,35 @@
-#accounts/urls.py
+# accounts/urls.py
 from django.urls import path
+from django.contrib.auth import views as auth_views  # ← this was missing
 from . import views
+
 app_name = 'accounts'
+
 urlpatterns = [
-    path('signup/', views.signup, name='signup'),
-    path('login/', views.user_login, name='login'),
-    path('logout/', views.user_logout, name='logout'),
-    path('redirect-after-login/', views.redirect_after_login, name='redirect_after_login'),
+    path('login/',    views.user_login,  name='login'),
+    path('logout/',   views.user_logout, name='logout'),
+    path('signup/',   views.signup,      name='signup'),
+    path('redirect/', views.redirect_after_login, name='redirect_after_login'),
+
+    # Password reset flow
+    path('password-reset/',
+         auth_views.PasswordResetView.as_view(
+             template_name='accounts/password_reset.html',
+             email_template_name='accounts/password_reset_email.html',
+             success_url='/accounts/password-reset/done/'
+         ),
+         name='password_reset'),
+
+    path('password-reset/done/',
+         auth_views.PasswordResetDoneView.as_view(
+             template_name='accounts/password_reset_done.html'
+         ),
+         name='password_reset_done'),
+
+    path('password-reset-confirm/<uidb64>/<token>/',
+         auth_views.PasswordResetConfirmView.as_view(
+             template_name='accounts/password_reset_confirm.html',
+             success_url='/accounts/login/'
+         ),
+         name='password_reset_confirm'),
 ]

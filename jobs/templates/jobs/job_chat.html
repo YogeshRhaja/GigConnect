@@ -1,42 +1,307 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Project Chat – FreelanceHub{% endblock %}
+
 {% block content %}
+<div class="container-lg py-4">
 
-<div class="container mt-5">
-
-<h4 class="mb-3">Project Chat</h4>
-
-<div class="border p-3 mb-3" style="height:300px; overflow-y:auto;">
-    {% for msg in messages %}
-        <div class="mb-2">
-            <strong>{{ msg.sender.username }}:</strong>
-            {{ msg.content }}
-            <br>
-            <small class="text-muted">
-                {{ msg.timestamp|date:"Y-m-d H:i" }}
-            </small>
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <a href="javascript:history.back()"
+               class="text-decoration-none text-muted d-inline-flex align-items-center gap-1"
+               style="font-size:0.875rem;">
+                <i class="fa-solid fa-arrow-left" style="font-size:11px;"></i>
+                Back
+            </a>
+            <div class="vr" style="height:16px;opacity:.2;"></div>
+            <h2 class="fw-semibold mb-0" style="font-size:1.1rem;">Project chat</h2>
         </div>
-        <hr>
-    {% empty %}
-        <p class="text-muted">No messages yet.</p>
-    {% endfor %}
+        <span style="font-size:0.8rem; padding:4px 12px; border-radius:20px;
+                     {% if chat.is_active %}background:#EAF3DE;color:#3B6D11;
+                     {% else %}background:#f4f6f8;color:#888;{% endif %}">
+            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;
+                         margin-right:5px;
+                         {% if chat.is_active %}background:#639922;
+                         {% else %}background:#aaa;{% endif %}"></span>
+            {% if chat.is_active %}Active{% else %}Closed{% endif %}
+        </span>
+    </div>
+
+    <!-- Two-column layout -->
+    <div class="row g-4" style="min-height: calc(100vh - 180px);">
+
+        <!-- LEFT: Chat panel -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm d-flex flex-column"
+                 style="border-radius:14px; overflow:hidden;
+                        height: calc(100vh - 200px); min-height: 520px;">
+
+                <!-- Chat thread -->
+                <div id="chatBox"
+                     class="flex-grow-1"
+                     style="overflow-y:auto; padding:1.5rem;
+                            background:#fafafa; display:flex;
+                            flex-direction:column; gap:14px;">
+
+                    {% for msg in messages %}
+                        {% if msg.sender == request.user %}
+                        <!-- Sent -->
+                        <div class="d-flex justify-content-end">
+                            <div style="max-width:62%;">
+                                <div style="background:#185FA5;color:#fff;
+                                            border-radius:14px 14px 3px 14px;
+                                            padding:11px 16px;font-size:0.875rem;
+                                            line-height:1.6;">
+                                    {{ msg.content }}
+                                </div>
+                                <div class="text-end mt-1"
+                                     style="font-size:0.7rem;color:#aaa;">
+                                    {{ msg.timestamp|date:"H:i" }} · You
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <!-- Received -->
+                        <div class="d-flex align-items-end gap-2">
+                            <div class="d-flex align-items-center justify-content-center
+                                        rounded-circle fw-semibold flex-shrink-0"
+                                 style="width:34px;height:34px;background:#E6F1FB;
+                                        color:#185FA5;font-size:11px;">
+                                {{ msg.sender.username|first|upper }}{{ msg.sender.username|slice:"1:2"|upper }}
+                            </div>
+                            <div style="max-width:62%;">
+                                <div style="font-size:0.72rem;color:#888;margin-bottom:3px;">
+                                    {{ msg.sender.username }}
+                                </div>
+                                <div style="background:#fff;
+                                            border:0.5px solid rgba(0,0,0,.08);
+                                            border-radius:14px 14px 14px 3px;
+                                            padding:11px 16px;font-size:0.875rem;
+                                            line-height:1.6;color:#1a1a2e;">
+                                    {{ msg.content }}
+                                </div>
+                                <div class="mt-1" style="font-size:0.7rem;color:#aaa;">
+                                    {{ msg.timestamp|date:"H:i" }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                    {% empty %}
+                        <div class="d-flex flex-column align-items-center
+                                    justify-content-center h-100 text-muted">
+                            <i class="fa-regular fa-comments mb-3"
+                               style="font-size:36px;opacity:.25;"></i>
+                            <p class="mb-1 fw-medium" style="font-size:0.9rem;">
+                                No messages yet
+                            </p>
+                            <p style="font-size:0.8rem;">
+                                Start the conversation below.
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Input -->
+                <div style="border-top:1px solid rgba(0,0,0,.06);
+                            background:#fff; padding:1rem 1.25rem;">
+                    {% if chat.is_active %}
+                    <form method="POST" id="chatForm">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2 align-items-end">
+                            <textarea name="message"
+                                      id="messageInput"
+                                      class="form-control"
+                                      rows="1"
+                                      placeholder="Type a message…"
+                                      required
+                                      style="border-radius:10px;resize:none;
+                                             font-size:0.875rem;
+                                             border:1px solid rgba(0,0,0,.12);
+                                             padding:10px 14px;line-height:1.5;
+                                             min-height:42px;"></textarea>
+                            <button type="submit"
+                                    class="btn btn-primary flex-shrink-0
+                                           d-flex align-items-center gap-2"
+                                    style="border-radius:10px;padding:10px 20px;
+                                           font-size:0.875rem;white-space:nowrap;">
+                                <i class="fa-solid fa-paper-plane"
+                                   style="font-size:13px;"></i>
+                                Send
+                            </button>
+                        </div>
+                        <div class="mt-2 text-muted" style="font-size:0.75rem;">
+                            <kbd style="font-size:0.7rem;">Ctrl</kbd> +
+                            <kbd style="font-size:0.7rem;">Enter</kbd> to send
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="d-flex align-items-center gap-2 text-muted">
+                        <i class="fa-solid fa-lock" style="font-size:13px;"></i>
+                        <span style="font-size:0.875rem;">
+                            This job is completed — chat is closed.
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
+        <!-- RIGHT: Job info sidebar -->
+        <div class="col-lg-4 d-flex flex-column gap-3">
+
+            <!-- Job details card -->
+            <div class="card border-0 shadow-sm"
+                 style="border-radius:14px;">
+                <div class="d-flex align-items-center gap-2 px-4 py-3"
+                     style="border-bottom:1px solid rgba(0,0,0,.06);">
+                    <div class="d-flex align-items-center justify-content-center rounded-2"
+                         style="width:28px;height:28px;background:#E6F1FB;">
+                        <i class="fa-solid fa-briefcase"
+                           style="font-size:12px;color:#185FA5;"></i>
+                    </div>
+                    <span class="fw-semibold" style="font-size:0.875rem;">
+                        Job details
+                    </span>
+                </div>
+                <div class="px-4 py-3" style="font-size:0.875rem;">
+                    <p class="fw-medium mb-1" style="font-size:1rem;">
+                        {{ chat.job.title }}
+                    </p>
+                    <p class="text-muted mb-3" style="font-size:0.8rem;line-height:1.6;">
+                        {{ chat.job.description|truncatewords:30 }}
+                    </p>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                        <div style="background:#f4f6f8;border-radius:8px;padding:10px 12px;">
+                            <div style="font-size:0.7rem;color:#888;
+                                        text-transform:uppercase;letter-spacing:.04em;
+                                        margin-bottom:3px;">Budget</div>
+                            <div class="fw-semibold" style="font-size:0.95rem;">
+                                ₹{{ chat.job.budget }}
+                            </div>
+                        </div>
+                        <div style="background:#f4f6f8;border-radius:8px;padding:10px 12px;">
+                            <div style="font-size:0.7rem;color:#888;
+                                        text-transform:uppercase;letter-spacing:.04em;
+                                        margin-bottom:3px;">Deadline</div>
+                            <div class="fw-semibold" style="font-size:0.875rem;">
+                                {{ chat.job.deadline }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Participants card -->
+            <div class="card border-0 shadow-sm" style="border-radius:14px;">
+                <div class="d-flex align-items-center gap-2 px-4 py-3"
+                     style="border-bottom:1px solid rgba(0,0,0,.06);">
+                    <div class="d-flex align-items-center justify-content-center rounded-2"
+                         style="width:28px;height:28px;background:#EEEDFE;">
+                        <i class="fa-solid fa-users"
+                           style="font-size:12px;color:#534AB7;"></i>
+                    </div>
+                    <span class="fw-semibold" style="font-size:0.875rem;">
+                        Participants
+                    </span>
+                </div>
+                <div class="px-4 py-3 d-flex flex-column gap-3">
+                    <!-- Employer -->
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center justify-content-center
+                                    rounded-circle fw-semibold"
+                             style="width:36px;height:36px;background:#E6F1FB;
+                                    color:#185FA5;font-size:12px;flex-shrink:0;">
+                            {{ chat.job.employer.username|first|upper }}{{ chat.job.employer.username|slice:"1:2"|upper }}
+                        </div>
+                        <div>
+                            <div class="fw-medium" style="font-size:0.875rem;">
+                                {{ chat.job.employer.username }}
+                            </div>
+                            <div style="font-size:0.75rem;color:#888;">Employer</div>
+                        </div>
+                    </div>
+                    <!-- Freelancer -->
+                    {% if chat.job.freelancer %}
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center justify-content-center
+                                    rounded-circle fw-semibold"
+                             style="width:36px;height:36px;background:#EAF3DE;
+                                    color:#3B6D11;font-size:12px;flex-shrink:0;">
+                            {{ chat.job.freelancer.username|first|upper }}{{ chat.job.freelancer.username|slice:"1:2"|upper }}
+                        </div>
+                        <div>
+                            <div class="fw-medium" style="font-size:0.875rem;">
+                                {{ chat.job.freelancer.username }}
+                            </div>
+                            <div style="font-size:0.75rem;color:#888;">Freelancer</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick actions -->
+            <div class="card border-0 shadow-sm" style="border-radius:14px;">
+                <div class="d-flex align-items-center gap-2 px-4 py-3"
+                     style="border-bottom:1px solid rgba(0,0,0,.06);">
+                    <div class="d-flex align-items-center justify-content-center rounded-2"
+                         style="width:28px;height:28px;background:#FAEEDA;">
+                        <i class="fa-solid fa-bolt"
+                           style="font-size:12px;color:#854F0B;"></i>
+                    </div>
+                    <span class="fw-semibold" style="font-size:0.875rem;">
+                        Quick actions
+                    </span>
+                </div>
+                <div class="px-4 py-3 d-flex flex-column gap-2">
+                    <a href="{% url 'employer:view_proposals' chat.job.id %}"
+                       class="btn btn-sm w-100 text-start d-flex align-items-center gap-2"
+                       style="border-radius:8px;font-size:0.825rem;
+                              border:0.5px solid rgba(0,0,0,.12);padding:8px 12px;">
+                        <i class="fa-solid fa-file-lines"
+                           style="font-size:12px;color:#185FA5;width:14px;"></i>
+                        View proposals
+                    </a>
+                    <a href="{% url 'employer:employer_dashboard' %}"
+                       class="btn btn-sm w-100 text-start d-flex align-items-center gap-2"
+                       style="border-radius:8px;font-size:0.825rem;
+                              border:0.5px solid rgba(0,0,0,.12);padding:8px 12px;">
+                        <i class="fa-solid fa-gauge"
+                           style="font-size:12px;color:#534AB7;width:14px;"></i>
+                        Back to dashboard
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </div>
 
-{% if chat.is_active %}
-<form method="POST">
-    {% csrf_token %}
-    <textarea name="message"
-              class="form-control mb-2"
-              rows="2"
-              required></textarea>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <button type="submit" class="btn btn-primary">
-        Send
-    </button>
-</form>
-{% else %}
-<p><em>This job is completed. Chat is closed.</em></p>
-{% endif %}
+<script>
+    const chatBox = document.getElementById('chatBox');
+    if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
 
-</div>
+    const input = document.getElementById('messageInput');
+    const form  = document.getElementById('chatForm');
+    if (input && form) {
+        input.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                form.submit();
+            }
+        });
+        input.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+        });
+    }
+</script>
 
 {% endblock %}

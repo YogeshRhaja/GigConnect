@@ -7,13 +7,15 @@
 <div class="container mt-5">
     <h2 class="mb-4">Upload Your Project Submission</h2>
 
-    {% if messages %}
+   {% if messages and not request.path|slice:":6" == "/login" %}
+    <div class="container mt-3">
         {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
+            <div class="alert alert-{{ message.tags }} shadow-sm">
                 {{ message }}
             </div>
         {% endfor %}
-    {% endif %}
+    </div>
+{% endif %}
 
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}

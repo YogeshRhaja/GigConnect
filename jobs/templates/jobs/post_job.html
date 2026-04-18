@@ -1,48 +1,160 @@
 {% extends "base.html" %}
-{% block title %}Post Job | FreelanceHub{% endblock %}
+{% load static %}
+
+{% block title %}Post a job – FreelanceHub{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-6">
+<div class="container py-5">
+<div class="row justify-content-center">
+<div class="col-lg-6 col-md-8">
 
-        <div class="card shadow-sm">
-            <div class="card-body">
-
-                <h4 class="text-center fw-bold mb-4">Post a New Job</h4>
-
-                <form method="post">
-                    {% csrf_token %}
-
-                    <input type="text" name="title"
-                           class="form-control mb-3"
-                           placeholder="Job Title" required>
-
-                    <textarea name="description"
-                              class="form-control mb-3"
-                              rows="4"
-                              placeholder="Job Description" required></textarea>
-
-                    <input type="number" name="budget"
-                           class="form-control mb-3"
-                           placeholder="Budget" required>
-
-                    <textarea name="skills_required"
-                              class="form-control mb-3"
-                              rows="3"
-                              placeholder="Skills Required (Python, Django)"
-                              required></textarea>
-
-                    <input type="date" name="deadline"
-                           class="form-control mb-4" required>
-
-                    <button class="btn btn-success w-100">
-                        Post Job
-                    </button>
-                </form>
-
-            </div>
-        </div>
-
+    <!-- Header -->
+    <div class="mb-4">
+        <a href="{% url 'employer:employer_dashboard' %}"
+           class="text-decoration-none text-muted d-inline-flex align-items-center gap-1 mb-3"
+           style="font-size:0.875rem;">
+            <i class="fa-solid fa-arrow-left" style="font-size:11px;"></i>
+            Back to dashboard
+        </a>
+        <h2 class="fw-semibold mb-1" style="font-size:1.4rem;">Post a new job</h2>
+        <p class="text-muted mb-0" style="font-size:0.875rem;">
+            Fill in the details below — freelancers will be matched automatically.
+        </p>
     </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show
+                        d-flex align-items-center gap-2 mb-3" role="alert">
+                <i class="fa-solid fa-circle-info" style="font-size:13px;"></i>
+                {{ message }}
+                <button type="button" class="btn-close ms-auto"
+                        data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Card -->
+    <div class="card border-0 shadow-sm" style="border-radius:14px;">
+        <div class="card-body p-4">
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- Job title -->
+                <div class="mb-3">
+                    <label class="form-label fw-medium" style="font-size:0.875rem;">
+                        Job title <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="fa-solid fa-pen-to-square text-muted"
+                               style="font-size:13px;"></i>
+                        </span>
+                        <input type="text" name="title"
+                               class="form-control border-start-0"
+                               placeholder="e.g. Django Backend Developer"
+                               required>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-3">
+                    <label class="form-label fw-medium" style="font-size:0.875rem;">
+                        Description <span class="text-danger">*</span>
+                    </label>
+                    <textarea name="description"
+                              class="form-control"
+                              rows="4"
+                              placeholder="Describe the project, deliverables, and expectations..."
+                              style="resize:vertical;"
+                              required></textarea>
+                </div>
+
+                <!-- Budget -->
+                <div class="mb-3">
+                    <label class="form-label fw-medium" style="font-size:0.875rem;">
+                        Budget (₹) <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"
+                              style="font-size:13px; color:#555;">₹</span>
+                        <input type="number" name="budget"
+                               class="form-control border-start-0"
+                               placeholder="e.g. 25000"
+                               min="0"
+                               required>
+                    </div>
+                </div>
+
+                <!-- Skills required -->
+                <div class="mb-3">
+                    <label class="form-label fw-medium" style="font-size:0.875rem;">
+                        Skills required <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="fa-solid fa-tags text-muted"
+                               style="font-size:13px;"></i>
+                        </span>
+                        <input type="text" name="skills_required"
+                               class="form-control border-start-0"
+                               placeholder="Python, Django, REST API"
+                               required>
+                    </div>
+                    <div class="form-text" style="font-size:0.78rem;">
+                        Separate skills with commas — used for AI freelancer matching.
+                    </div>
+                </div>
+
+                <!-- Deadline -->
+                <div class="mb-4">
+                    <label class="form-label fw-medium" style="font-size:0.875rem;">
+                        Deadline <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="fa-solid fa-calendar text-muted"
+                               style="font-size:13px;"></i>
+                        </span>
+                        <input type="date" name="deadline"
+                               class="form-control border-start-0"
+                               required>
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <hr style="border-color:rgba(0,0,0,.06); margin-bottom:1.25rem;">
+
+                <!-- Actions -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary fw-medium flex-grow-1"
+                            style="padding:10px; border-radius:8px;">
+                        <i class="fa-solid fa-paper-plane me-2" style="font-size:13px;"></i>
+                        Post job
+                    </button>
+                    <a href="{% url 'employer:employer_dashboard' %}"
+                       class="btn btn-outline-secondary"
+                       style="padding:10px 20px; border-radius:8px;">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Helper note -->
+    <p class="text-center text-muted mt-3 mb-0" style="font-size:0.8rem;">
+        <i class="fa-solid fa-shield-halved me-1"></i>
+        Your job will be reviewed and matched with qualified freelancers automatically.
+    </p>
+
 </div>
+</div>
+</div>
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 {% endblock %}

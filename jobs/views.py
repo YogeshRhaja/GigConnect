@@ -8,9 +8,9 @@ from profiles.models import FreelancerSkill
 from recommendations.utils import calculate_match
 from django.contrib.auth.models import User
 from .models import Job, Proposal, ProjectChat, Message
-from .models import JobInvite
+from .models import Job, JobInvite
+from payments.models import Wallet
 # ----------------- EMPLOYER DASHBOARD -----------------
-
 @login_required
 def employer_dashboard(request):
     role = getattr(request.user.account_profile, 'role', None)
@@ -18,38 +18,47 @@ def employer_dashboard(request):
         return HttpResponseForbidden("Access denied")
 
     jobs = Job.objects.filter(employer=request.user)
+    freelancers = FreelancerSkill.objects.select_related('freelancer')
     recommended_freelancers = []
 
     for job in jobs:
         if not job.skills_required:
             continue
-
-        freelancers = FreelancerSkill.objects.select_related('freelancer')
-
         for fs in freelancers:
             score = calculate_match(fs.skills, job.skills_required)
-
             if score > 0:
                 recommended_freelancers.append({
                     'freelancer': fs.freelancer,
                     'skills': fs.skills,
+                    'skills_list': [s.strip() for s in fs.skills.split(',') if s.strip()],
                     'job': job,
-                    'score': score
+                    'score': score,
+                    'already_invited': JobInvite.objects.filter(
+                        job=job,
+                        freelancer=fs.freelancer
+                    ).exists(),
                 })
 
-    # Sort by score (highest first)
     recommended_freelancers = sorted(
         recommended_freelancers,
         key=lambda x: x['score'],
         reverse=True
     )
 
+    submissions = Proposal.objects.filter(
+        job__employer=request.user,
+        submission__isnull=False
+    ).select_related('job', 'freelancer')
+
+    # ✅ ADD THIS
+    wallet, created = Wallet.objects.get_or_create(user=request.user)
+
     return render(request, 'jobs/employer_dashboard.html', {
         'jobs': jobs,
-        'recommended_freelancers': recommended_freelancers
+        'recommended_freelancers': recommended_freelancers,
+        'submissions': submissions,
+        'wallet': wallet,   # ✅ ADD THIS
     })
-
-
 @login_required
 def post_job(request):
     if request.method == 'POST':
@@ -220,7 +229,6 @@ def apply_job(request, job_id):
 
     return render(request, 'jobs/apply_job.html', {'job': job})
 from .models import JobInvite
-
 @login_required
 def invite_freelancer(request, job_id, freelancer_id):
 
@@ -238,8 +246,8 @@ def invite_freelancer(request, job_id, freelancer_id):
     freelancer = get_object_or_404(User, id=freelancer_id)
 
     if JobInvite.objects.filter(job=job, freelancer=freelancer).exists():
-        messages.warning(request, "Already invited this freelancer.")
-        return redirect('jobs:employer_dashboard')  # ✅ FIXED
+        messages.warning(request, f"You already invited {freelancer.username}.")
+        return redirect('employer:employer_dashboard')  # ← fixed namespace
 
     JobInvite.objects.create(
         job=job,
@@ -248,10 +256,8 @@ def invite_freelancer(request, job_id, freelancer_id):
         message="We would like to invite you for this job."
     )
 
-    messages.success(request, "Freelancer invited successfully!")
-    return redirect('jobs:employer_dashboard')  # ✅ FIXED
-
-
+    messages.success(request, f"Invitation sent to {freelancer.username} for '{job.title}'.")
+    return redirect('employer:employer_dashboard')  # ← fixed namespace
 @login_required
 def accept_invite(request, invite_id):
     invite = get_object_or_404(JobInvite, id=invite_id)
@@ -323,7 +329,6 @@ def mark_project_completed(request, proposal_id):
     messages.success(request, f"Project '{job.title}' marked as completed.")
     return redirect('jobs:freelancer_dashboard')
 
-
 @login_required
 def upload_submission(request, proposal_id):
     proposal = get_object_or_404(Proposal, id=proposal_id)
@@ -331,9 +336,9 @@ def upload_submission(request, proposal_id):
     if proposal.freelancer != request.user:
         return HttpResponseForbidden("Access denied")
 
-    if request.method == 'POST' and request.FILES.get('submission_file'):
-        # Create a simple file field on Proposal if not exists
-        proposal.submission = request.FILES['submission_file']
+    if request.method == 'POST' and request.FILES.get('file'):
+        proposal.submission = request.FILES['file']
+        proposal.status = 'completed'   # mark submitted
         proposal.save()
         messages.success(request, "Submission uploaded successfully.")
         return redirect('jobs:freelancer_dashboard')
@@ -395,3 +400,58 @@ def freelancer_accept_proposal(request, proposal_id):
     ProjectChat.objects.get_or_create(job=job)
     messages.success(request, f"You accepted the job '{job.title}'.")
     return redirect('jobs:freelancer_dashboard')
+def employer_submissions(request):
+    proposals = Proposal.objects.filter(
+    job__employer=request.user,
+    status='completed'
+    )
+    return render(request, 'jobs/employer_submissions.html', {
+            'proposals': proposals
+        })
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
+from django.contrib import messages
+from payments.models import EscrowTransaction, Wallet
+from .models import Proposal
+
+@login_required
+def approve_project(request, proposal_id):
+    proposal = get_object_or_404(Proposal, id=proposal_id)
+
+    # security check
+    if proposal.job.employer != request.user:
+        return HttpResponseForbidden()
+
+    # mark approved
+    proposal.status = 'approved'
+    proposal.save()
+
+    # release escrow
+    escrow = EscrowTransaction.objects.filter(job=proposal.job).first()
+
+    if escrow and not escrow.released:
+        freelancer_wallet, created = Wallet.objects.get_or_create(
+            user=escrow.freelancer
+        )
+
+        freelancer_wallet.balance += escrow.amount
+        freelancer_wallet.save()
+
+        escrow.released = True
+        escrow.save()
+
+    messages.success(request, "Project approved and payment released.")
+    return redirect('jobs:employer_submissions')
+@login_required
+def reject_project(request, proposal_id):
+    proposal = get_object_or_404(Proposal, id=proposal_id)
+
+    if proposal.job.employer != request.user:
+        return HttpResponseForbidden()
+
+    proposal.status = 'pending'
+    proposal.save()
+
+    messages.warning(request, "Project rejected. Ask for revision.")
+    return redirect('jobs:employer_submissions')

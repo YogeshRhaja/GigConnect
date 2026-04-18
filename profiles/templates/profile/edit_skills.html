@@ -1,49 +1,185 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Skills – FreelanceHub{% endblock %}
+
 {% block content %}
+<div class="container py-5">
+<div class="row justify-content-center">
+<div class="col-lg-5 col-md-7">
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
+    <!-- Back link -->
+    <a href="{% url 'freelancer:freelancer_dashboard' %}"
+       class="text-decoration-none text-muted d-inline-flex align-items-center gap-1 mb-3"
+       style="font-size:0.875rem;">
+        <i class="fa-solid fa-arrow-left" style="font-size:11px;"></i>
+        Back to dashboard
+    </a>
 
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0">
+    <!-- Header -->
+    <div class="mb-4">
+        <h2 class="fw-semibold mb-1" style="font-size:1.4rem;">Edit your skills</h2>
+        <p class="text-muted mb-0" style="font-size:0.875rem;">
+            Keep your skills updated to get better AI job matches.
+        </p>
+    </div>
 
-                <div class="card-body p-4">
-
-                    <h4 class="fw-bold text-center mb-4">
-                        Edit Your Skills
-                    </h4>
-
-                    <form method="POST">
-                        {% csrf_token %}
-
-                        <div class="mb-3">
-                            <label for="skills" class="form-label fw-semibold">
-                                Skills (comma separated)
-                            </label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="skills"
-                                name="skills"
-                                placeholder="Python, Django, React, AI"
-                                value="{{ skills.skills|default:'' }}"
-                            >
-                            <small class="text-muted">
-                                Example: Python, Machine Learning, Web Development
-                            </small>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">
-                            Save Skills
-                        </button>
-                    </form>
-
-                </div>
-
+    <!-- Flash messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show
+                        d-flex align-items-center gap-2 mb-3" role="alert"
+                 style="border-radius:10px;font-size:0.875rem;">
+                <i class="fa-solid
+                    {% if message.tags == 'success' %}fa-circle-check
+                    {% elif message.tags == 'danger' %}fa-circle-xmark
+                    {% else %}fa-circle-info{% endif %}"
+                   style="font-size:14px;"></i>
+                {{ message }}
+                <button type="button" class="btn-close ms-auto"
+                        data-bs-dismiss="alert"></button>
             </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Card -->
+    <div class="card border-0 shadow-sm" style="border-radius:14px;">
+        <div class="d-flex align-items-center gap-2 px-4 py-3"
+             style="border-bottom:1px solid rgba(0,0,0,.06);">
+            <div class="d-flex align-items-center justify-content-center rounded-2"
+                 style="width:30px;height:30px;background:#EEEDFE;">
+                <i class="fa-solid fa-star" style="font-size:13px;color:#534AB7;"></i>
+            </div>
+            <span class="fw-semibold" style="font-size:0.9rem;">Your skill set</span>
         </div>
 
+        <div class="card-body p-4">
+            <form method="POST" id="skillsForm">
+                {% csrf_token %}
+
+                <!-- Skills input -->
+                <div class="mb-2">
+                    <label class="form-label fw-medium" style="font-size:0.875rem;">
+                        Skills
+                        <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="fa-solid fa-tags text-muted"
+                               style="font-size:13px;"></i>
+                        </span>
+                        <input type="text"
+                               class="form-control border-start-0"
+                               id="skillsInput"
+                               name="skills"
+                               placeholder="Python, Django, React, Machine Learning"
+                               value="{{ skills.skills|default:'' }}"
+                               autocomplete="off">
+                    </div>
+                    <div class="form-text" style="font-size:0.78rem;">
+                        Separate each skill with a comma — used for AI job matching.
+                    </div>
+                </div>
+
+                <!-- Live skill pills preview -->
+                <div id="skillPreview"
+                     class="d-flex flex-wrap gap-2 mb-4 mt-3"
+                     style="min-height:32px;">
+                </div>
+
+                <hr style="border-color:rgba(0,0,0,.06);margin-bottom:1.25rem;">
+
+                <!-- Actions -->
+                <div class="d-flex gap-2">
+                    <button type="submit"
+                            class="btn btn-primary fw-medium flex-grow-1"
+                            style="padding:10px;border-radius:8px;">
+                        <i class="fa-solid fa-floppy-disk me-2"
+                           style="font-size:13px;"></i>
+                        Save skills
+                    </button>
+                    <a href="{% url 'freelancer:freelancer_dashboard' %}"
+                       class="btn btn-outline-secondary"
+                       style="padding:10px 20px;border-radius:8px;">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Suggestion chips -->
+    <!-- Suggestion chips -->
+<div class="mt-4">
+    <p class="text-muted mb-2" style="font-size:0.8rem;">
+        <i class="fa-solid fa-lightbulb me-1"></i>
+        Popular skills — click to add:
+    </p>
+    <div class="d-flex flex-wrap gap-2">
+        <button type="button" onclick="addSuggestion('Python')" class="btn btn-sm" style="border-radius:20px;font-size:0.78rem;padding:4px 12px;border:0.5px solid rgba(0,0,0,.15);background:#fff;">+ Python</button>
+        <button type="button" onclick="addSuggestion('Django')" class="btn btn-sm" style="border-radius:20px;font-size:0.78rem;padding:4px 12px;border:0.5px solid rgba(0,0,0,.15);background:#fff;">+ Django</button>
+        <button type="button" onclick="addSuggestion('React')" class="btn btn-sm" style="border-radius:20px;font-size:0.78rem;padding:4px 12px;border:0.5px solid rgba(0,0,0,.15);background:#fff;">+ React</button>
+        <button type="button" onclick="addSuggestion('JavaScript')" class="btn btn-sm" style="border-radius:20px;font-size:0.78rem;padding:4px 12px;border:0.5px solid rgba(0,0,0,.15);background:#fff;">+ JavaScript</button>
+        <button type="button" onclick="addSuggestion('Node.js')" class="btn btn-sm" style="border-radius:20px;font-size:0.78rem;padding:4px 12px;border:0.5px solid rgba(0,0,0,.15);background:#fff;">+ Node.js</button>
+        <button type="button" onclick="addSuggestion('Machine Learning')" class="btn btn-sm" style="border-radius:20px;font-size:0.78rem;padding:4px 12px;border:0.5px solid rgba(0,0,0,.15);background:#fff;">+ Machine Learning</button>
+        <button type="button" onclick="addSuggestion('REST API')" class="btn btn-sm" style="border-radius:20px;font-size:0.78rem;padding:4px 12px;border:0.5px solid rgba(0,0,0,.15);background:#fff;">+ REST API</button>
+        <button type="button" onclick="addSuggestion('PostgreSQL')" class="btn btn-sm" style="border-radius:20px;font-size:0.78rem;padding:4px 12px;border:0.5px solid rgba(0,0,0,.15);background:#fff;">+ PostgreSQL</button>
+        <button type="button" onclick="addSuggestion('Docker')" class="btn btn-sm" style="border-radius:20px;font-size:0.78rem;padding:4px 12px;border:0.5px solid rgba(0,0,0,.15);background:#fff;">+ Docker</button>
+        <button type="button" onclick="addSuggestion('AWS')" class="btn btn-sm" style="border-radius:20px;font-size:0.78rem;padding:4px 12px;border:0.5px solid rgba(0,0,0,.15);background:#fff;">+ AWS</button>
     </div>
 </div>
+
+</div>
+</div>
+</div>
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<script>
+const input   = document.getElementById('skillsInput');
+const preview = document.getElementById('skillPreview');
+
+function renderPills(value) {
+    const skills = value.split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+
+    preview.innerHTML = skills.map(s => `
+        <span style="display:inline-flex;align-items:center;gap:6px;
+                     background:#EEEDFE;color:#534AB7;
+                     border-radius:20px;padding:4px 12px;font-size:0.78rem;font-weight:500;">
+            ${s}
+            <span onclick="removeSkill('${s}')"
+                  style="cursor:pointer;font-size:12px;opacity:.6;line-height:1;">✕</span>
+        </span>
+    `).join('');
+}
+
+function removeSkill(skill) {
+    const skills = input.value.split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0 && s !== skill);
+    input.value = skills.join(', ');
+    renderPills(input.value);
+}
+
+function addSuggestion(skill) {
+    const skills = input.value.split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+    if (!skills.includes(skill)) {
+        skills.push(skill);
+        input.value = skills.join(', ');
+        renderPills(input.value);
+    }
+}
+
+input.addEventListener('input', () => renderPills(input.value));
+
+// Render on page load if skills already exist
+renderPills(input.value);
+</script>
 
 {% endblock %}

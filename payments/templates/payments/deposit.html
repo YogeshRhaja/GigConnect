@@ -1,0 +1,7 @@
+<h2>Add Money to Wallet</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="number" name="amount" placeholder="Enter amount" required>
+    <button type="submit">Deposit</button>
+</form>

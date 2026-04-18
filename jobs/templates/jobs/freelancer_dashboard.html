@@ -1,176 +1,471 @@
 {% extends "base.html" %}
-{% block content %}
+{% load static %}
 
-<div class="container mt-5">
+{% block title %}Freelancer Dashboard – FreelanceHub{% endblock %}
+
+{% block content %}
+<div class="container-lg py-4">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Freelancer Dashboard</h2>
-        <a href="{% url 'profiles:edit_skills' %}" class="btn btn-success">
-            ✏️ My Skills
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h2 class="fw-semibold mb-1" style="font-size:1.4rem;">Freelancer dashboard</h2>
+            <p class="text-muted mb-0" style="font-size:0.875rem;">
+                Welcome back — here's your work overview
+            </p>
+        </div>
+        <a href="{% url 'profiles:edit_skills' %}"
+           class="btn btn-primary d-inline-flex align-items-center gap-2"
+           style="border-radius:8px;padding:8px 18px;font-size:0.875rem;">
+            <i class="fa-solid fa-star" style="font-size:12px;"></i>
+            My skills
         </a>
     </div>
 
-    <!-- Job Invitations -->
-    <div class="card shadow-sm mb-5">
-        <div class="card-body">
-            <h4 class="mb-3">📩 Job Invitations</h4>
+    <!-- Flash messages -->
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show
+                            d-flex align-items-center gap-2"
+                     role="alert" style="border-radius:10px;font-size:0.875rem;">
+                    <i class="fa-solid
+                        {% if message.tags == 'success' %}fa-circle-check
+                        {% elif message.tags == 'danger' %}fa-circle-xmark
+                        {% else %}fa-circle-info{% endif %}"
+                       style="font-size:14px;"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close ms-auto"
+                            data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-            {% if invites %}
-            <div class="list-group">
-                {% for invite in invites %}
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-1">{{ invite.job.title }}</h5>
-                        <small>From: {{ invite.employer.username }}</small>
+    <!-- Stat cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="rounded-3 p-3" style="background:#f4f6f8;">
+                <div class="text-muted mb-1"
+                     style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;">
+                    Invitations
+                </div>
+                <div class="fw-semibold" style="font-size:1.5rem;">
+                    {{ invites|length }}
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="rounded-3 p-3" style="background:#f4f6f8;">
+                <div class="text-muted mb-1"
+                     style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;">
+                    Active projects
+                </div>
+                <div class="fw-semibold" style="font-size:1.5rem;">
+                    {{ accepted_proposals|length }}
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="rounded-3 p-3" style="background:#f4f6f8;">
+                <div class="text-muted mb-1"
+                     style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;">
+                    AI matches
+                </div>
+                <div class="fw-semibold" style="font-size:1.5rem;">
+                    {{ recommended_jobs|length }}
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="rounded-3 p-3" style="background:#f4f6f8;">
+                <div class="text-muted mb-1"
+                     style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;">
+                    Available jobs
+                </div>
+                <div class="fw-semibold" style="font-size:1.5rem;">
+                    {{ jobs|length }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Job Invitations ── -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;overflow:hidden;">
+        <div class="d-flex align-items-center justify-content-between px-4 py-3"
+             style="border-bottom:1px solid rgba(0,0,0,.06);">
+            <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center justify-content-center rounded-2"
+                     style="width:30px;height:30px;background:#EEEDFE;">
+                    <i class="fa-solid fa-envelope" style="font-size:13px;color:#534AB7;"></i>
+                </div>
+                <span class="fw-semibold" style="font-size:0.9rem;">Job invitations</span>
+            </div>
+            <span class="badge rounded-pill"
+                  style="background:#f4f6f8;color:#666;font-weight:500;font-size:0.75rem;">
+                {{ invites|length }} pending
+            </span>
+        </div>
+
+        {% if invites %}
+        <div class="px-4 py-3 d-flex flex-column gap-3">
+            {% for invite in invites %}
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-3"
+                 style="background:#fafafa;border:0.5px solid rgba(0,0,0,.06);">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center
+                                rounded-circle fw-semibold flex-shrink-0"
+                         style="width:40px;height:40px;background:#E6F1FB;
+                                color:#185FA5;font-size:12px;">
+                        {{ invite.employer.username|first|upper }}{{ invite.employer.username|slice:"1:2"|upper }}
                     </div>
                     <div>
-                        <a href="{% url 'jobs:accept_invite' invite.id %}"
-                           class="btn btn-success btn-sm me-1">
-                           Accept
-                        </a>
-                        <a href="{% url 'jobs:decline_invite' invite.id %}"
-                           class="btn btn-danger btn-sm">
-                           Decline
-                        </a>
+                        <div class="fw-medium" style="font-size:0.9rem;">
+                            {{ invite.job.title }}
+                        </div>
+                        <div style="font-size:0.78rem;color:#888;">
+                            <i class="fa-solid fa-user me-1" style="font-size:10px;"></i>
+                            From {{ invite.employer.username }}
+                            &nbsp;·&nbsp;
+                            <i class="fa-solid fa-indian-rupee-sign me-1" style="font-size:10px;"></i>
+                            ₹{{ invite.job.budget }}
+                            &nbsp;·&nbsp;
+                            <i class="fa-regular fa-calendar me-1" style="font-size:10px;"></i>
+                            {{ invite.job.deadline|date:"M d, Y" }}
+                        </div>
                     </div>
                 </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <p class="text-muted mb-0">No pending invitations.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- AI Recommended Jobs -->
-    <div class="card shadow-sm mb-5">
-        <div class="card-body">
-            <h4 class="mb-3">🤖 AI Recommended Jobs</h4>
-
-            {% if recommended_jobs %}
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Title</th>
-                            <th>Skills Required</th>
-                            <th>Apply</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for job in recommended_jobs %}
-                        <tr>
-                            <td class="fw-semibold">{{ job.title }}</td>
-                            <td class="text-muted">{{ job.skills_required }}</td>
-                            <td>
-                                <a href="{% url 'freelancer:apply_job' job.id %}"
-                                   class="btn btn-primary btn-sm">
-                                    Apply
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <p class="text-muted mb-0">No AI recommendations yet.</p>
-            {% endif %}
-        </div>
-    </div>
-<!-- Accepted Projects / My Projects -->
-<div class="card shadow-sm mb-5">
-    <div class="card-body">
-        <h4 class="mb-3">🛠️ My Projects</h4>
-
-        {% if accepted_proposals %}
-        <div class="row">
-            {% for proposal in accepted_proposals %}
-            <div class="col-md-6 mb-3">
-                <div class="card h-100 border-primary">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ proposal.job.title }}</h5>
-                        <p class="card-text">
-                            <strong>Employer:</strong> {{ proposal.job.employer.username }}<br>
-                            <strong>Deadline:</strong> {{ proposal.job.deadline|date:"Y-m-d" }}<br>
-                            <strong>Status:</strong> {{ proposal.status|capfirst }}
-                        </p>
-                        <div class="d-flex gap-2 flex-wrap">
-                            {% if proposal.status != 'completed' %}
-                            <a href="{% url 'jobs:mark_project_completed' proposal.id %}" class="btn btn-success btn-sm">
-                                Mark as Completed
-                            </a>
-                            {% endif %}
-                            <a href="{% url 'jobs:job_chat' proposal.job.id %}"
-   class="btn btn-primary btn-sm">
-    Message Employer
-</a>
-
-                            <a href="{% url 'jobs:upload_submission' proposal.id %}" class="btn btn-warning btn-sm">
-                                Upload Submission
-                            </a>
-                        </div>
-                        {% if proposal.submission %}
-                        <p class="mt-2"><strong>Submitted File:</strong>
-                            <a href="{{ proposal.submission.url }}" target="_blank">Download</a>
-                        </p>
-                        {% endif %}
-                    </div>
+                <div class="d-flex gap-2 flex-shrink-0">
+                    <a href="{% url 'jobs:accept_invite' invite.id %}"
+                       class="btn btn-sm d-flex align-items-center gap-1"
+                       style="border-radius:7px;font-size:0.8rem;padding:5px 14px;
+                              background:#EAF3DE;color:#3B6D11;border:none;">
+                        <i class="fa-solid fa-check" style="font-size:10px;"></i>
+                        Accept
+                    </a>
+                    <a href="{% url 'jobs:decline_invite' invite.id %}"
+                       class="btn btn-sm d-flex align-items-center gap-1"
+                       style="border-radius:7px;font-size:0.8rem;padding:5px 14px;
+                              background:#FCEBEB;color:#A32D2D;border:none;">
+                        <i class="fa-solid fa-xmark" style="font-size:10px;"></i>
+                        Decline
+                    </a>
                 </div>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <p class="text-muted mb-0">No active projects yet.</p>
+        <div class="text-center py-5 text-muted">
+            <i class="fa-solid fa-envelope mb-2 d-block"
+               style="font-size:24px;opacity:.3;"></i>
+            <p class="mb-0" style="font-size:0.875rem;">No pending invitations.</p>
+        </div>
         {% endif %}
     </div>
-</div>
 
-    <!-- Available Jobs -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h4 class="mb-3">📄 Available Jobs</h4>
-
-            <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Title</th>
-                            <th>Budget</th>
-                            <th>Skills Required</th>
-                            <th>Deadline</th>
-                            <th>Apply</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for job in jobs %}
-                        <tr>
-                            <td class="fw-semibold">{{ job.title }}</td>
-                            <td>₹{{ job.budget }}</td>
-                            <td>{{ job.skills_required }}</td>
-                            <td>{{ job.deadline|date:"Y-m-d" }}</td>
-                            <td>
-                                <a href="{% url 'freelancer:apply_job' job.id %}"
-                                   class="btn btn-primary btn-sm">
-                                    Apply
-                                </a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">
-                                No jobs available
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <!-- ── AI Recommended Jobs ── -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;overflow:hidden;">
+        <div class="d-flex align-items-center justify-content-between px-4 py-3"
+             style="border-bottom:1px solid rgba(0,0,0,.06);">
+            <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center justify-content-center rounded-2"
+                     style="width:30px;height:30px;background:#EEEDFE;">
+                    <i class="fa-solid fa-robot" style="font-size:13px;color:#534AB7;"></i>
+                </div>
+                <span class="fw-semibold" style="font-size:0.9rem;">AI recommended jobs</span>
             </div>
+            <span class="badge rounded-pill"
+                  style="background:#f4f6f8;color:#666;font-weight:500;font-size:0.75rem;">
+                {{ recommended_jobs|length }} match{{ recommended_jobs|length|pluralize }}
+            </span>
+        </div>
 
+        {% if recommended_jobs %}
+        <div class="table-responsive">
+            <table class="table mb-0 align-middle" style="font-size:0.875rem;">
+                <thead style="background:#fafafa;">
+                    <tr>
+                        <th class="px-4 py-3 text-muted fw-medium"
+                            style="font-size:0.7rem;text-transform:uppercase;
+                                   letter-spacing:.05em;border-bottom:1px solid rgba(0,0,0,.06);">
+                            Job title
+                        </th>
+                        <th class="px-4 py-3 text-muted fw-medium"
+                            style="font-size:0.7rem;text-transform:uppercase;
+                                   letter-spacing:.05em;border-bottom:1px solid rgba(0,0,0,.06);">
+                            Skills required
+                        </th>
+                        <th class="px-4 py-3 text-muted fw-medium"
+                            style="font-size:0.7rem;text-transform:uppercase;
+                                   letter-spacing:.05em;border-bottom:1px solid rgba(0,0,0,.06);">
+                            Budget
+                        </th>
+                        <th class="px-4 py-3 text-muted fw-medium"
+                            style="font-size:0.7rem;text-transform:uppercase;
+                                   letter-spacing:.05em;border-bottom:1px solid rgba(0,0,0,.06);">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in recommended_jobs %}
+                    <tr style="border-bottom:1px solid rgba(0,0,0,.04);">
+                        <td class="px-4 py-3 fw-medium">{{ job.title }}</td>
+                        <td class="px-4 py-3">
+                            {% for skill in job.skills_required|slice:":3" %}
+                                <span class="badge rounded-pill me-1"
+                                      style="background:#f4f6f8;color:#555;
+                                             font-weight:500;font-size:0.7rem;">
+                                    {{ skill }}
+                                </span>
+                            {% endfor %}
+                        </td>
+                        <td class="px-4 py-3 fw-medium">₹{{ job.budget }}</td>
+                        <td class="px-4 py-3">
+                            <a href="{% url 'freelancer:apply_job' job.id %}"
+                               class="btn btn-sm btn-primary"
+                               style="font-size:0.8rem;border-radius:7px;padding:4px 14px;">
+                                <i class="fa-solid fa-paper-plane me-1"
+                                   style="font-size:10px;"></i>
+                                Apply
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="fa-solid fa-robot mb-2 d-block"
+               style="font-size:24px;opacity:.3;"></i>
+            <p class="mb-0" style="font-size:0.875rem;">No AI recommendations yet.</p>
+            <p style="font-size:0.8rem;">Update your skills to get better matches.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ── My Projects ── -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius:14px;overflow:hidden;">
+        <div class="d-flex align-items-center justify-content-between px-4 py-3"
+             style="border-bottom:1px solid rgba(0,0,0,.06);">
+            <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center justify-content-center rounded-2"
+                     style="width:30px;height:30px;background:#E6F1FB;">
+                    <i class="fa-solid fa-briefcase" style="font-size:13px;color:#185FA5;"></i>
+                </div>
+                <span class="fw-semibold" style="font-size:0.9rem;">My projects</span>
+            </div>
+            <span class="badge rounded-pill"
+                  style="background:#f4f6f8;color:#666;font-weight:500;font-size:0.75rem;">
+                {{ accepted_proposals|length }} active
+            </span>
+        </div>
+
+        {% if accepted_proposals %}
+        <div class="p-4">
+            <div class="row g-3">
+                {% for proposal in accepted_proposals %}
+                <div class="col-md-6">
+                    <div class="h-100 p-4 rounded-3"
+                         style="border:0.5px solid rgba(0,0,0,.08);background:#fff;">
+
+                        <!-- Project header -->
+                        <div class="d-flex align-items-start
+                                    justify-content-between mb-3">
+                            <div>
+                                <div class="fw-semibold mb-1" style="font-size:0.95rem;">
+                                    {{ proposal.job.title }}
+                                </div>
+                                <div style="font-size:0.78rem;color:#888;">
+                                    <i class="fa-solid fa-user me-1"
+                                       style="font-size:10px;"></i>
+                                    {{ proposal.job.employer.username }}
+                                </div>
+                            </div>
+                            {% if proposal.status == 'completed' %}
+                                <span class="badge rounded-pill"
+                                      style="background:#EAF3DE;color:#3B6D11;
+                                             font-size:0.72rem;font-weight:500;">
+                                    <i class="fa-solid fa-check me-1"
+                                       style="font-size:9px;"></i>
+                                    Completed
+                                </span>
+                            {% else %}
+                                <span class="badge rounded-pill"
+                                      style="background:#E6F1FB;color:#185FA5;
+                                             font-size:0.72rem;font-weight:500;">
+                                    <i class="fa-solid fa-circle me-1"
+                                       style="font-size:7px;"></i>
+                                    In progress
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Project meta -->
+                        <div class="d-flex gap-3 mb-3"
+                             style="font-size:0.78rem;color:#888;">
+                            <span>
+                                <i class="fa-regular fa-calendar me-1"
+                                   style="font-size:10px;"></i>
+                                {{ proposal.job.deadline|date:"M d, Y" }}
+                            </span>
+                            <span>
+                                <i class="fa-solid fa-indian-rupee-sign me-1"
+                                   style="font-size:10px;"></i>
+                                ₹{{ proposal.job.budget }}
+                            </span>
+                        </div>
+
+                        <!-- Submitted file -->
+                        {% if proposal.submission %}
+                        <div class="mb-3 p-2 rounded-2 d-flex align-items-center gap-2"
+                             style="background:#EAF3DE;font-size:0.8rem;">
+                            <i class="fa-solid fa-file-arrow-down"
+                               style="font-size:12px;color:#3B6D11;"></i>
+                            <a href="{{ proposal.submission.url }}"
+                               target="_blank"
+                               class="text-decoration-none fw-medium"
+                               style="color:#3B6D11;">
+                                View submitted file
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        <!-- Actions -->
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{% url 'jobs:job_chat' proposal.job.id %}"
+                               class="btn btn-sm d-flex align-items-center gap-1"
+                               style="border-radius:7px;font-size:0.8rem;padding:5px 12px;
+                                      background:#E6F1FB;color:#185FA5;border:none;">
+                                <i class="fa-solid fa-message"
+                                   style="font-size:10px;"></i>
+                                Message
+                            </a>
+                            <a href="{% url 'jobs:upload_submission' proposal.id %}"
+                               class="btn btn-sm d-flex align-items-center gap-1"
+                               style="border-radius:7px;font-size:0.8rem;padding:5px 12px;
+                                      background:#FAEEDA;color:#854F0B;border:none;">
+                                <i class="fa-solid fa-upload"
+                                   style="font-size:10px;"></i>
+                                Upload
+                            </a>
+                            {% if proposal.status != 'completed' %}
+                            <a href="{% url 'jobs:mark_project_completed' proposal.id %}"
+                               class="btn btn-sm d-flex align-items-center gap-1"
+                               style="border-radius:7px;font-size:0.8rem;padding:5px 12px;
+                                      background:#EAF3DE;color:#3B6D11;border:none;">
+                                <i class="fa-solid fa-circle-check"
+                                   style="font-size:10px;"></i>
+                                Mark done
+                            </a>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="fa-solid fa-briefcase mb-2 d-block"
+               style="font-size:24px;opacity:.3;"></i>
+            <p class="mb-0" style="font-size:0.875rem;">No active projects yet.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ── Available Jobs ── -->
+    <div class="card border-0 shadow-sm" style="border-radius:14px;overflow:hidden;">
+        <div class="d-flex align-items-center justify-content-between px-4 py-3"
+             style="border-bottom:1px solid rgba(0,0,0,.06);">
+            <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center justify-content-center rounded-2"
+                     style="width:30px;height:30px;background:#EAF3DE;">
+                    <i class="fa-solid fa-magnifying-glass"
+                       style="font-size:13px;color:#3B6D11;"></i>
+                </div>
+                <span class="fw-semibold" style="font-size:0.9rem;">Available jobs</span>
+            </div>
+            <span class="badge rounded-pill"
+                  style="background:#f4f6f8;color:#666;font-weight:500;font-size:0.75rem;">
+                {{ jobs|length }} open
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table mb-0 align-middle" style="font-size:0.875rem;">
+                <thead style="background:#fafafa;">
+                    <tr>
+                        <th class="px-4 py-3 text-muted fw-medium"
+                            style="font-size:0.7rem;text-transform:uppercase;
+                                   letter-spacing:.05em;border-bottom:1px solid rgba(0,0,0,.06);">
+                            Title
+                        </th>
+                        <th class="px-4 py-3 text-muted fw-medium"
+                            style="font-size:0.7rem;text-transform:uppercase;
+                                   letter-spacing:.05em;border-bottom:1px solid rgba(0,0,0,.06);">
+                            Budget
+                        </th>
+                        <th class="px-4 py-3 text-muted fw-medium"
+                            style="font-size:0.7rem;text-transform:uppercase;
+                                   letter-spacing:.05em;border-bottom:1px solid rgba(0,0,0,.06);">
+                            Skills
+                        </th>
+                        <th class="px-4 py-3 text-muted fw-medium"
+                            style="font-size:0.7rem;text-transform:uppercase;
+                                   letter-spacing:.05em;border-bottom:1px solid rgba(0,0,0,.06);">
+                            Deadline
+                        </th>
+                        <th class="px-4 py-3 text-muted fw-medium"
+                            style="font-size:0.7rem;text-transform:uppercase;
+                                   letter-spacing:.05em;border-bottom:1px solid rgba(0,0,0,.06);">
+                            Action
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                    <tr style="border-bottom:1px solid rgba(0,0,0,.04);">
+                        <td class="px-4 py-3 fw-medium">{{ job.title }}</td>
+                        <td class="px-4 py-3">₹{{ job.budget }}</td>
+                        <td class="px-4 py-3">
+                            <span class="text-muted" style="font-size:0.8rem;">
+                                {{ job.skills_required|truncatechars:40 }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-muted" style="font-size:0.8rem;">
+                            {{ job.deadline|date:"M d, Y" }}
+                        </td>
+                        <td class="px-4 py-3">
+                            <a href="{% url 'freelancer:apply_job' job.id %}"
+                               class="btn btn-sm btn-primary"
+                               style="font-size:0.8rem;border-radius:7px;padding:4px 14px;">
+                                <i class="fa-solid fa-paper-plane me-1"
+                                   style="font-size:10px;"></i>
+                                Apply
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-briefcase mb-2 d-block"
+                               style="font-size:24px;opacity:.3;"></i>
+                            <p class="mb-0" style="font-size:0.875rem;">
+                                No jobs available right now.
+                            </p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
 </div>
 
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 {% endblock %}

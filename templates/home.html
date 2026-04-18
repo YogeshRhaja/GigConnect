@@ -1,156 +1,286 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}FreelanceHub – AI-Powered Freelancing{% endblock %}
+
 {% block content %}
 
-<style>
-    body {
-        background-color: #f8fafc;
-        font-family: 'Segoe UI', sans-serif;
-    }
+<!-- ── Hero ── -->
+<section style="background:#0f172a; border-radius:16px; padding:80px 40px;
+                text-align:center; margin-bottom:3rem;">
 
-    .hero {
-        background: linear-gradient(120deg, #0f172a, #1e293b);
-        color: white;
-        padding: 90px 20px;
-        text-align: center;
-        border-radius: 12px;
-    }
+    <div style="display:inline-flex;align-items:center;gap:8px;
+                background:rgba(255,255,255,.08);border-radius:20px;
+                padding:6px 16px;margin-bottom:1.5rem;">
+        <span style="width:7px;height:7px;border-radius:50%;
+                     background:#22c55e;display:inline-block;"></span>
+        <span style="font-size:0.8rem;color:#94a3b8;font-weight:500;">
+            AI-powered matching · Secure escrow · Live chat
+        </span>
+    </div>
 
-    .hero h1 {
-        font-size: 3rem;
-        font-weight: 700;
-    }
+    <h1 style="font-size:clamp(2rem,5vw,3.2rem);font-weight:700;
+               color:#fff;line-height:1.2;margin-bottom:1rem;">
+        Hire experts.<br>Work confidently.
+    </h1>
+    <p style="font-size:1.05rem;color:#94a3b8;max-width:480px;
+              margin:0 auto 2rem;line-height:1.7;">
+        The freelancing platform where AI matches talent to opportunity
+        and escrow keeps every payment safe.
+    </p>
 
-    .hero p {
-        font-size: 1.2rem;
-        margin-top: 10px;
-        color: #cbd5e1;
-    }
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a href="{% url 'accounts:signup' %}"
+           class="btn fw-semibold d-inline-flex align-items-center gap-2"
+           style="background:#185FA5;color:#fff;border-radius:10px;
+                  padding:12px 28px;font-size:0.9rem;border:none;">
+            <i class="fa-solid fa-user-plus" style="font-size:13px;"></i>
+            Get started free
+        </a>
+        <a href="{% url 'accounts:login' %}"
+           class="btn fw-semibold d-inline-flex align-items-center gap-2"
+           style="background:rgba(255,255,255,.08);color:#fff;
+                  border-radius:10px;padding:12px 28px;font-size:0.9rem;
+                  border:1px solid rgba(255,255,255,.15);">
+            <i class="fa-solid fa-right-to-bracket" style="font-size:13px;"></i>
+            Sign in
+        </a>
+    </div>
 
-    .btn-main {
-        background-color: #22c55e;
-        color: white;
-        padding: 12px 28px;
-        border-radius: 30px;
-        font-weight: 600;
-        text-decoration: none;
-    }
-
-    .btn-outline {
-        border: 2px solid white;
-        color: white;
-        padding: 12px 28px;
-        border-radius: 30px;
-        font-weight: 600;
-        text-decoration: none;
-    }
-
-    .feature-card {
-        background: white;
-        border-radius: 14px;
-        padding: 30px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-        transition: transform 0.3s;
-    }
-
-    .feature-card:hover {
-        transform: translateY(-6px);
-    }
-
-    footer {
-        background-color: #0f172a;
-        color: #94a3b8;
-        padding: 20px;
-        text-align: center;
-        margin-top: 60px;
-        border-radius: 12px;
-    }
-</style>
-
-<!-- HERO -->
-<section class="hero mb-5">
-    <h1>Hire Experts. Work Confidently.</h1>
-    <p>AI-powered freelancing platform with secure escrow payments</p>
-
-    <div class="mt-4">
-        <a href="{% url 'accounts:login' %}" class="btn-main me-3">Login</a>
-        <a href="{% url 'accounts:signup' %}" class="btn-outline">Create Account</a>
+    <!-- Trust bar -->
+    <div class="d-flex justify-content-center gap-4 flex-wrap mt-5"
+         style="font-size:0.8rem;color:#64748b;">
+        <span>
+            <i class="fa-solid fa-shield-halved me-1" style="color:#22c55e;"></i>
+            Escrow protected
+        </span>
+        <span>
+            <i class="fa-solid fa-robot me-1" style="color:#818cf8;"></i>
+            AI skill matching
+        </span>
+        <span>
+            <i class="fa-solid fa-bolt me-1" style="color:#facc15;"></i>
+            Instant proposals
+        </span>
+        <span>
+            <i class="fa-solid fa-message me-1" style="color:#38bdf8;"></i>
+            Built-in chat
+        </span>
     </div>
 </section>
 
-<!-- FEATURES -->
-<section class="container my-5">
+<!-- ── Why choose us ── -->
+<section class="container mb-5">
     <div class="text-center mb-4">
-        <h2 class="fw-bold">Why Choose Us?</h2>
-        <p class="text-muted">Built for trust, speed, and smart hiring</p>
+        <h2 class="fw-semibold mb-1" style="font-size:1.6rem;">Why FreelanceHub?</h2>
+        <p class="text-muted" style="font-size:0.9rem;">
+            Built for trust, speed, and smart hiring
+        </p>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-3">
         <div class="col-md-4">
-            <div class="feature-card text-center">
-                <h5 class="fw-bold">AI Job Matching</h5>
-                <p class="text-muted mt-2">
-                    Freelancers and employers are matched using AI skill analysis.
+            <div class="h-100 p-4 rounded-3"
+                 style="background:#fff;border:0.5px solid rgba(0,0,0,.07);">
+                <div class="d-flex align-items-center justify-content-center rounded-2 mb-3"
+                     style="width:40px;height:40px;background:#EEEDFE;">
+                    <i class="fa-solid fa-robot"
+                       style="font-size:16px;color:#534AB7;"></i>
+                </div>
+                <h5 class="fw-semibold mb-2" style="font-size:0.95rem;">
+                    AI job matching
+                </h5>
+                <p class="text-muted mb-0" style="font-size:0.85rem;line-height:1.6;">
+                    Our AI analyses freelancer skills and job requirements
+                    to surface the best matches automatically.
                 </p>
             </div>
         </div>
-
         <div class="col-md-4">
-            <div class="feature-card text-center">
-                <h5 class="fw-bold">Secure Escrow Payments</h5>
-                <p class="text-muted mt-2">
-                    Funds are released only after work approval.
+            <div class="h-100 p-4 rounded-3"
+                 style="background:#fff;border:0.5px solid rgba(0,0,0,.07);">
+                <div class="d-flex align-items-center justify-content-center rounded-2 mb-3"
+                     style="width:40px;height:40px;background:#EAF3DE;">
+                    <i class="fa-solid fa-shield-halved"
+                       style="font-size:16px;color:#3B6D11;"></i>
+                </div>
+                <h5 class="fw-semibold mb-2" style="font-size:0.95rem;">
+                    Secure escrow payments
+                </h5>
+                <p class="text-muted mb-0" style="font-size:0.85rem;line-height:1.6;">
+                    Funds are held in escrow and released only after
+                    the employer approves the submitted work.
                 </p>
             </div>
         </div>
-
         <div class="col-md-4">
-            <div class="feature-card text-center">
-                <h5 class="fw-bold">Verified Proposals</h5>
-                <p class="text-muted mt-2">
-                    Transparent bidding and proposal management.
+            <div class="h-100 p-4 rounded-3"
+                 style="background:#fff;border:0.5px solid rgba(0,0,0,.07);">
+                <div class="d-flex align-items-center justify-content-center rounded-2 mb-3"
+                     style="width:40px;height:40px;background:#E6F1FB;">
+                    <i class="fa-solid fa-file-lines"
+                       style="font-size:16px;color:#185FA5;"></i>
+                </div>
+                <h5 class="fw-semibold mb-2" style="font-size:0.95rem;">
+                    Verified proposals
+                </h5>
+                <p class="text-muted mb-0" style="font-size:0.85rem;line-height:1.6;">
+                    Transparent bidding with full proposal history
+                    so employers can make confident decisions.
                 </p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- HOW IT WORKS -->
-<section class="container my-5">
+<!-- ── How it works ── -->
+<section class="container mb-5">
     <div class="text-center mb-4">
-        <h2 class="fw-bold">How It Works</h2>
+        <h2 class="fw-semibold mb-1" style="font-size:1.6rem;">How it works</h2>
+        <p class="text-muted" style="font-size:0.9rem;">Up and running in four steps</p>
     </div>
 
-    <div class="row g-4 text-center">
-        <div class="col-md-3">
-            <div class="feature-card">
-                <h6 class="fw-bold">1. Create Account</h6>
-                <p class="text-muted">Signup as Employer or Freelancer</p>
+    <div class="row g-3">
+        {% for step in steps %}
+        {% endfor %}
+
+        <div class="col-md-3 col-sm-6">
+            <div class="p-4 rounded-3 h-100 text-center"
+                 style="background:#fafafa;border:0.5px solid rgba(0,0,0,.06);">
+                <div class="d-inline-flex align-items-center justify-content-center
+                            rounded-circle fw-semibold mb-3"
+                     style="width:36px;height:36px;background:#185FA5;
+                            color:#fff;font-size:0.85rem;">1</div>
+                <h6 class="fw-semibold mb-1" style="font-size:0.875rem;">
+                    Create account
+                </h6>
+                <p class="text-muted mb-0" style="font-size:0.8rem;line-height:1.6;">
+                    Sign up as an employer or freelancer in under a minute.
+                </p>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="feature-card">
-                <h6 class="fw-bold">2. Post or Apply</h6>
-                <p class="text-muted">Jobs or proposals in minutes</p>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="p-4 rounded-3 h-100 text-center"
+                 style="background:#fafafa;border:0.5px solid rgba(0,0,0,.06);">
+                <div class="d-inline-flex align-items-center justify-content-center
+                            rounded-circle fw-semibold mb-3"
+                     style="width:36px;height:36px;background:#185FA5;
+                            color:#fff;font-size:0.85rem;">2</div>
+                <h6 class="fw-semibold mb-1" style="font-size:0.875rem;">
+                    Post or apply
+                </h6>
+                <p class="text-muted mb-0" style="font-size:0.8rem;line-height:1.6;">
+                    Post a job or browse AI-matched listings and submit proposals.
+                </p>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="feature-card">
-                <h6 class="fw-bold">3. Secure Escrow</h6>
-                <p class="text-muted">Payments held safely</p>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="p-4 rounded-3 h-100 text-center"
+                 style="background:#fafafa;border:0.5px solid rgba(0,0,0,.06);">
+                <div class="d-inline-flex align-items-center justify-content-center
+                            rounded-circle fw-semibold mb-3"
+                     style="width:36px;height:36px;background:#185FA5;
+                            color:#fff;font-size:0.85rem;">3</div>
+                <h6 class="fw-semibold mb-1" style="font-size:0.875rem;">
+                    Escrow & work
+                </h6>
+                <p class="text-muted mb-0" style="font-size:0.8rem;line-height:1.6;">
+                    Budget is locked in escrow. Collaborate via built-in project chat.
+                </p>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="feature-card">
-                <h6 class="fw-bold">4. Get Paid</h6>
-                <p class="text-muted">Release after approval</p>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="p-4 rounded-3 h-100 text-center"
+                 style="background:#fafafa;border:0.5px solid rgba(0,0,0,.06);">
+                <div class="d-inline-flex align-items-center justify-content-center
+                            rounded-circle fw-semibold mb-3"
+                     style="width:36px;height:36px;background:#22c55e;
+                            color:#fff;font-size:0.85rem;">4</div>
+                <h6 class="fw-semibold mb-1" style="font-size:0.875rem;">
+                    Get paid
+                </h6>
+                <p class="text-muted mb-0" style="font-size:0.8rem;line-height:1.6;">
+                    Submit work, get approval, and payment is released instantly.
+                </p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- FOOTER -->
-<footer>
-    © 2026 FreelanceHub | Secure AI Freelancing Platform
+<!-- ── Role split CTA ── -->
+<section class="container mb-5">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="p-4 rounded-3 h-100"
+                 style="background:#0f172a;color:#fff;">
+                <div class="d-flex align-items-center justify-content-center rounded-2 mb-3"
+                     style="width:40px;height:40px;background:rgba(255,255,255,.1);">
+                    <i class="fa-solid fa-briefcase"
+                       style="font-size:16px;color:#fff;"></i>
+                </div>
+                <h4 class="fw-semibold mb-2" style="font-size:1.1rem;">
+                    I'm an employer
+                </h4>
+                <p style="font-size:0.85rem;color:#94a3b8;line-height:1.7;margin-bottom:1.5rem;">
+                    Post jobs, receive proposals from vetted freelancers,
+                    and manage projects with AI-assisted matching.
+                </p>
+                <a href="{% url 'accounts:signup' %}"
+                   class="btn fw-medium d-inline-flex align-items-center gap-2"
+                   style="background:#185FA5;color:#fff;border-radius:8px;
+                          padding:9px 20px;font-size:0.85rem;border:none;">
+                    <i class="fa-solid fa-plus" style="font-size:11px;"></i>
+                    Post a job
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="p-4 rounded-3 h-100"
+                 style="background:#185FA5;color:#fff;">
+                <div class="d-flex align-items-center justify-content-center rounded-2 mb-3"
+                     style="width:40px;height:40px;background:rgba(255,255,255,.15);">
+                    <i class="fa-solid fa-laptop-code"
+                       style="font-size:16px;color:#fff;"></i>
+                </div>
+                <h4 class="fw-semibold mb-2" style="font-size:1.1rem;">
+                    I'm a freelancer
+                </h4>
+                <p style="font-size:0.85rem;color:#bfdbfe;line-height:1.7;margin-bottom:1.5rem;">
+                    Browse AI-matched jobs, submit proposals, chat with employers,
+                    and get paid securely through escrow.
+                </p>
+                <a href="{% url 'accounts:signup' %}"
+                   class="btn fw-medium d-inline-flex align-items-center gap-2"
+                   style="background:#fff;color:#185FA5;border-radius:8px;
+                          padding:9px 20px;font-size:0.85rem;border:none;">
+                    <i class="fa-solid fa-paper-plane" style="font-size:11px;"></i>
+                    Find work
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer class="rounded-3 text-center py-4 mt-2 mb-3"
+        style="background:#0f172a;color:#64748b;font-size:0.825rem;">
+    <div class="d-flex justify-content-center align-items-center gap-2 mb-2">
+        <div style="width:24px;height:24px;background:#185FA5;border-radius:6px;
+                    display:inline-flex;align-items:center;justify-content:center;">
+            <i class="fa-solid fa-briefcase"
+               style="font-size:11px;color:#fff;"></i>
+        </div>
+        <span style="color:#fff;font-weight:500;font-size:0.875rem;">
+            FreelanceHub
+        </span>
+    </div>
+    <p class="mb-0">© 2026 FreelanceHub · Secure AI Freelancing Platform</p>
 </footer>
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 {% endblock %}

@@ -4,33 +4,34 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import UserProfile  # only this, no FreelancerProfile
+from .models import UserProfile
+
 
 def signup(request):
     if request.method == 'POST':
         username = request.POST['username']
-        email = request.POST['email']
+        email    = request.POST['email']
         password = request.POST['password']
-        role = request.POST['role']
+        role     = request.POST['role']
 
         if User.objects.filter(username=username).exists():
-            messages.error(request, "Username already exists")
-            return redirect('signup')
+            messages.error(request, "Username already exists.")
+            return render(request, 'accounts/signup.html')  # ← render, not redirect (safer for messages)
 
-        # 1️⃣ Create the user
         user = User.objects.create_user(
             username=username,
             email=email,
             password=password
         )
 
-        # 2️⃣ Create UserProfile with role
         profile, created = UserProfile.objects.get_or_create(
             user=user,
             defaults={'role': role}
         )
+        if not created:
+            profile.role = role
+            profile.save()
 
-        # 3️⃣ Log in the user
         login(request, user)
         return redirect('accounts:redirect_after_login')
 
@@ -38,6 +39,10 @@ def signup(request):
 
 
 def user_login(request):
+    # Already logged in? skip the login page
+    if request.user.is_authenticated:
+        return redirect('accounts:redirect_after_login')
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -46,26 +51,27 @@ def user_login(request):
 
         if user:
             login(request, user)
-            return redirect('accounts:redirect_after_login')  # role-based redirect
+            return redirect('accounts:redirect_after_login')
         else:
             messages.error(request, "Invalid username or password.")
-            return redirect('accounts:login')
+            return render(request, 'accounts/login.html')  # render directly, no redirect
 
     return render(request, 'accounts/login.html')
 
 
+
 def user_logout(request):
     logout(request)
-    return redirect('accounts:login')
+    messages.success(request, "You've been logged out successfully.")
+    return redirect('home')
 
 
 @login_required
 def redirect_after_login(request):
-    # get user profile safely
     profile = getattr(request.user, 'account_profile', None)
 
     if not profile:
-        messages.error(request, "No profile found for this user.")
+        messages.error(request, "No profile found. Please contact support.")
         return redirect('accounts:login')
 
     if profile.role == 'employer':
@@ -75,11 +81,13 @@ def redirect_after_login(request):
 
     return redirect('home')
 
+
 def home(request):
     if request.user.is_authenticated:
-        role = request.user.account_profile.role
-        if role == "freelancer":
-            return redirect("freelancer:freelancer_dashboard")
-        else:
-            return redirect("employer:employer_dashboard")
-    return render(request, "home.html")
+        # Use getattr to avoid crash if profile missing
+        profile = getattr(request.user, 'account_profile', None)
+        if profile and profile.role == 'freelancer':
+            return redirect('freelancer:freelancer_dashboard')
+        elif profile:
+            return redirect('employer:employer_dashboard')
+    return render(request, 'home.html')

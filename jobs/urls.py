@@ -1,6 +1,8 @@
 #jobs/urls.py
-from django.urls import path
+from django.urls import path, include
 from . import views
+
+
 
 app_name = 'jobs'  # ✅ important if using namespaces
 
@@ -21,7 +23,8 @@ urlpatterns = [
     path('freelancer/dashboard/', views.freelancer_dashboard, name='freelancer_dashboard'),
     path('project/<int:job_id>/chat/', views.job_chat, name='job_chat'),
 
-
+path('approve-project/<int:proposal_id>/', views.approve_project, name='approve_project'),
+    path('reject-project/<int:proposal_id>/', views.reject_project, name='reject_project'),
 
     # ✅ this is needed
 ]
