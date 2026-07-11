@@ -1,15 +1,19 @@
 # freelancehub/settings.py
 import os
+import dj_database_url
 from pathlib import Path
 from django.contrib.messages import constants as message_constants
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-*$3#q4g01g1j0szv4k92g0zg7+h(g2741yhag196l&w+s39qgw'
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-*$3#q4g01g1j0szv4k92g0zg7+h(g2741yhag196l&w+s39qgw'  # fallback for local dev only
+)
 
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') if os.environ.get('ALLOWED_HOSTS') else []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -27,6 +31,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',   # ← added, right after security
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -54,23 +59,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'freelancehub.wsgi.application'
 
+# ── Database ──────────────────────────────────────────────
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'freelancehub_db',
-        'USER': 'root',
-        'PASSWORD': 'Mamcet@123',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
-        },
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get(
+            'DATABASE_URL',
+            'mysql://root:Mamcet%40123@localhost:3306/freelancehub_db'  # local dev fallback
+        ),
+        conn_max_age=600,
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 8}},
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
@@ -84,7 +86,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ── Static files ──────────────────────────────────────────
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']   # ← fixes theme.css 404
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'   # ← needed for collectstatic on Render
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ── Auth redirects ────────────────────────────────────────
 LOGIN_URL = '/accounts/login/'
@@ -95,13 +99,13 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'FreelanceHub <noreply@freelancehub.com>'
 
-# ── Messages: map Django's 'error' → Bootstrap's 'danger' ─
 MESSAGE_TAGS = {
     message_constants.DEBUG:   'secondary',
     message_constants.INFO:    'info',
     message_constants.SUCCESS: 'success',
     message_constants.WARNING: 'warning',
-    message_constants.ERROR:   'danger',    # ← this is the critical one
+    message_constants.ERROR:   'danger',
 }
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
